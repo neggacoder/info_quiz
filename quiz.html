@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz App</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #1a1d27;
+    --bg3: #22263a;
+    --card: #1e2235;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.15);
+    --text: #f0f2ff;
+    --text2: #8b91b3;
+    --text3: #5a6080;
+    --accent: #6c63ff;
+    --accent2: #8b84ff;
+    --accent-bg: rgba(108,99,255,0.12);
+    --green: #22c55e;
+    --green-bg: rgba(34,197,94,0.12);
+    --red: #ef4444;
+    --red-bg: rgba(239,68,68,0.12);
+    --yellow: #f59e0b;
+    --yellow-bg: rgba(245,158,11,0.12);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .app { width: 100%; max-width: 720px; }
+
+  /* ── SCREENS ── */
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── SETUP SCREEN ── */
+  .logo {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .logo-icon {
+    width: 64px; height: 64px;
+    background: var(--accent-bg);
+    border: 1px solid rgba(108,99,255,0.3);
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin-bottom: 16px;
+  }
+  .logo h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
+  .logo p { color: var(--text2); font-size: 14px; margin-top: 6px; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 20px;
+  }
+
+  .setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .setting-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .setting-row:first-of-type { padding-top: 0; }
+  .setting-label { font-size: 15px; font-weight: 500; }
+  .setting-sub { font-size: 12px; color: var(--text2); margin-top: 3px; }
+
+  .counter {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .counter-btn {
+    width: 34px; height: 34px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+    line-height: 1;
+  }
+  .counter-btn:hover { background: var(--bg2); border-color: var(--accent); }
+  .counter-val {
+    font-size: 18px;
+    font-weight: 700;
+    min-width: 36px;
+    text-align: center;
+    color: var(--accent2);
+  }
+  .counter-input {
+    width: 80px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    padding: 10px 8px;
+    outline: none;
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+  .counter-input::-webkit-outer-spin-button,
+  .counter-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .counter-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(108,99,255,0.12);
+  }
+  .counter-max { font-size: 12px; color: var(--text3); }
+
+  /* Toggle */
+  .toggle-group {
+    display: flex;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  .toggle-opt {
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text2);
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .toggle-opt.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .btn-start {
+    width: 100%;
+    padding: 16px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.2px;
+    transition: opacity 0.15s, transform 0.1s;
+    margin-top: 8px;
+  }
+  .btn-start:hover { opacity: 0.9; }
+  .btn-start:active { transform: scale(0.99); }
+  .btn-start:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .file-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: var(--bg3);
+    border: 1px dashed var(--border2);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text2);
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .file-label:hover { border-color: var(--accent); color: var(--text); }
+  .file-label .icon { font-size: 18px; }
+  /* ── QUIZ SCREEN ── */
+  .quiz-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .quiz-counter { font-size: 13px; color: var(--text2); font-weight: 500; }
+  .quiz-score-badge {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 12px;
+    background: var(--accent-bg);
+    border: 1px solid rgba(108,99,255,0.25);
+    border-radius: 20px;
+    color: var(--accent2);
+  }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--bg3);
+    border-radius: 2px;
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .question-block {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .quiz-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 18px;
+    align-items: start;
+  }
+  .quiz-sidebar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    max-height: calc(100vh - 120px);
+    overflow: auto;
+  }
+  .sidebar-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text2);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .sidebar-item {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+  .sidebar-item:hover {
+    border-color: var(--accent);
+    background: rgba(108,99,255,0.08);
+  }
+  .sidebar-item.current {
+    border-color: var(--accent);
+    background: rgba(108,99,255,0.14);
+  }
+  .sidebar-item.correct-status {
+    border-color: var(--green);
+    background: rgba(34,197,94,0.12);
+  }
+  .sidebar-item.wrong-status {
+    border-color: var(--red);
+    background: rgba(239,68,68,0.12);
+  }
+  .sidebar-item.skipped {
+    border-color: var(--yellow);
+    background: rgba(245,158,11,0.12);
+  }
+  .question-type-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-single { background: var(--accent-bg); color: var(--accent2); border: 1px solid rgba(108,99,255,0.25); }
+  .badge-multiple { background: var(--yellow-bg); color: var(--yellow); border: 1px solid rgba(245,158,11,0.25); }
+
+  .question-text {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+  .question-hint { font-size: 12px; color: var(--text3); margin-top: -16px; margin-bottom: 20px; }
+
+  .options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .matching-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .matching-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .match-btn.active {
+    border-color: var(--accent);
+    background: rgba(108,99,255,0.16);
+  }
+  .match-btn.matched {
+    border-color: var(--green) !important;
+    background: var(--green-bg) !important;
+    color: var(--green);
+  }
+  .selected-pairs {
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--text2);
+  }
+  .option-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--bg3);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+    width: 100%;
+    color: var(--text);
+    font-size: 15px;
+    font-family: inherit;
+  }
+  .option-btn:hover:not(:disabled) { border-color: var(--accent); background: rgba(108,99,255,0.07); }
+  .option-btn.selected { border-color: var(--accent); background: var(--accent-bg); }
+  .option-btn.correct { border-color: var(--green) !important; background: var(--green-bg) !important; color: var(--green); }
+  .option-btn.wrong { border-color: var(--red) !important; background: var(--red-bg) !important; color: var(--red); }
+  .option-btn.missed { border-color: var(--yellow) !important; background: var(--yellow-bg) !important; }
+  .option-btn:disabled { cursor: default; }
+
+  .opt-key {
+    min-width: 30px; height: 30px;
+    border: 1.5px solid var(--border2);
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text2);
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .option-btn.selected .opt-key { border-color: var(--accent); color: var(--accent2); background: var(--accent-bg); }
+  .option-btn.correct .opt-key { border-color: var(--green); color: var(--green); background: var(--green-bg); }
+  .option-btn.wrong .opt-key { border-color: var(--red); color: var(--red); background: var(--red-bg); }
+  .opt-text { flex: 1; line-height: 1.4; }
+  .opt-icon { font-size: 16px; margin-left: auto; flex-shrink: 0; }
+
+  .quiz-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .btn-action {
+    padding: 12px 28px;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1.5px solid transparent;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-outline {
+    background: transparent;
+    color: var(--text2);
+    border-color: var(--border2);
+  }
+  .btn-outline:hover { color: var(--text); border-color: var(--text2); }
+
+  .feedback-box {
+    display: none;
+    margin-top: 16px;
+    padding: 14px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+  .feedback-box.correct { background: var(--green-bg); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+  .feedback-box.wrong { background: var(--red-bg); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+
+  /* ── RESULTS SCREEN ── */
+  .results-header { text-align: center; margin-bottom: 32px; }
+  .score-circle {
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    border: 4px solid var(--accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    background: var(--accent-bg);
+    flex-direction: column;
+  }
+  .score-pct { font-size: 28px; font-weight: 800; color: var(--accent2); }
+  .score-lbl { font-size: 11px; color: var(--text2); }
+  .results-title { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .results-sub { font-size: 14px; color: var(--text2); }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    text-align: center;
+  }
+  .stat-val { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+  .stat-key { font-size: 12px; color: var(--text2); }
+  .stat-green .stat-val { color: var(--green); }
+  .stat-red .stat-val { color: var(--red); }
+  .stat-yellow .stat-val { color: var(--yellow); }
+
+  .review-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+  .review-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 18px 20px;
+    border-left: 3px solid var(--border);
+  }
+  .review-item.correct-item { border-left-color: var(--green); }
+  .review-item.wrong-item { border-left-color: var(--red); }
+  .review-item.partial-item { border-left-color: var(--yellow); }
+  .review-q { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .review-row { font-size: 13px; color: var(--text2); margin-top: 4px; }
+  .review-row span { font-weight: 600; }
+  .review-correct span { color: var(--green); }
+  .review-wrong span { color: var(--red); }
+  .review-status {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .s-correct { background: var(--green-bg); color: var(--green); }
+  .s-wrong { background: var(--red-bg); color: var(--red); }
+  .s-partial { background: var(--yellow-bg); color: var(--yellow); }
+
+  .results-actions { display: flex; gap: 12px; }
+  .btn-restart {
+    flex: 1;
+    padding: 14px;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+  }
+  .btn-restart:hover { opacity: 0.88; }
+  .btn-restart-outline {
+    flex: 1;
+    padding: 14px;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    background: transparent;
+    color: var(--text2);
+    border: 1.5px solid var(--border2);
+  }
+  .btn-restart-outline:hover { color: var(--text); border-color: var(--text2); }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 780px) {
+    .quiz-layout { grid-template-columns: 1fr; }
+    .quiz-sidebar { max-height: none; }
+  }
+
+  @media (max-width: 540px) {
+    .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .stat-val { font-size: 20px; }
+    .question-text { font-size: 16px; }
+    .toggle-opt { padding: 7px 10px; }
+  }
+.descriptions-list {
+    margin-bottom: 20px;
+    padding: 12px;
+    background: var(--bg2);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+  .description-item { margin-bottom: 4px; }
+  
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── SETUP ── -->
+  <div class="screen active" id="setupScreen">
+    <div class="logo">
+      <div class="logo-icon">🧠</div>
+      <h1>Quiz App</h1>
+      <p>Тестке дайындалыңыз</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Параметрлер</div>
+
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Сұрақтар саны</div>
+          <div class="setting-sub" id="totalCountLabel">Барлығы: — сұрақ</div>
+        </div>
+        <div class="counter">
+          <button class="counter-btn" id="qMinus">−</button>
+          <div>
+            <input type="number" class="counter-input" id="qCount" min="1" value="10">
+            <div class="counter-max" id="qMax"></div>
+          </div>
+          <button class="counter-btn" id="qPlus">+</button>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Жауапты көрсету</div>
+          <div class="setting-sub">Жауапты қашан көрсету керек</div>
+        </div>
+        <div class="toggle-group">
+          <div class="toggle-opt active" id="toggleInstant" onclick="setFeedback('instant')">Бірден</div>
+          <div class="toggle-opt" id="toggleEnd" onclick="setFeedback('end')">Соңында</div>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Сұрақтарды араластыру</div>
+          <div class="setting-sub">Кездейсоқ тәртіп</div>
+        </div>
+        <div class="toggle-group">
+          <div class="toggle-opt active" id="toggleShuffleOn" onclick="setShuffle(true)">Иә</div>
+          <div class="toggle-opt" id="toggleShuffleOff" onclick="setShuffle(false)">Жоқ</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-start" id="startBtn" onclick="startQuiz()">Тестті бастау →</button>
+  </div>
+
+  <!-- ── QUIZ ── -->
+  <div class="screen" id="quizScreen">
+    <div class="quiz-layout">
+      <div class="quiz-sidebar" id="quizSidebar"></div>
+      <div class="quiz-content">
+        <div class="quiz-header">
+          <div class="quiz-counter" id="quizCounter">Сұрақ 1 / 10</div>
+          <div class="quiz-score-badge" id="quizScore">0 дұрыс</div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
+
+        <div class="question-block">
+          <div class="question-type-badge badge-single" id="qTypeBadge">Бір жауапты</div>
+          <div class="question-text" id="questionText"></div>
+          <div class="question-hint" id="questionHint"></div>
+          <div class="options-grid" id="optionsGrid"></div>
+          <div class="feedback-box" id="feedbackBox"></div>
+        </div>
+
+        <div class="quiz-actions">
+          <button class="btn-action btn-outline" onclick="skipQuestion()">Өткізу</button>
+          <button class="btn-action btn-primary" id="confirmBtn" onclick="confirmAnswer()" disabled>Растау</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RESULTS ── -->
+  <div class="screen" id="resultsScreen">
+    <div class="results-header">
+      <div class="score-circle">
+        <div class="score-pct" id="scorePct">0%</div>
+        <div class="score-lbl">Нәтиже</div>
+      </div>
+      <div class="results-title" id="resultsTitle"></div>
+      <div class="results-sub" id="resultsSub"></div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card stat-green"><div class="stat-val" id="statCorrect">0</div><div class="stat-key">Дұрыс</div></div>
+      <div class="stat-card stat-red"><div class="stat-val" id="statWrong">0</div><div class="stat-key">Қате</div></div>
+      <div class="stat-card stat-yellow"><div class="stat-val" id="statSkipped">0</div><div class="stat-key">Өткізілген</div></div>
+    </div>
+
+    <div class="section-title">Жауаптарды қарау</div>
+    <div class="review-list" id="reviewList"></div>
+
+    <div class="results-actions">
+      <button class="btn-restart-outline" onclick="goSetup()">⚙ Параметрлер</button>
+      <button class="btn-restart" onclick="restartQuiz()">↺ Қайта бастау</button>
+    </div>
+  </div>
+
+</div>
+
+<script>let allQuestions = [];
+let quizQuestions = [];
+let currentIdx = 0;
+let selectedKeys = new Set();
+let answers = [];
+let answersMap = new Map();
+let score = 0;
+let feedbackMode = 'instant';
+let shuffleEnabled = true;
+let questionCount = 10;
+let answered = false;
+let matchingState = null;
+
+const DEFAULT_JSON_PATH = 'data.json';
+
+async function loadDefaultJSON() {
+  try {
+    const r = await fetch(DEFAULT_JSON_PATH);
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    allQuestions = data;
+    updateCounterUI();
+  } catch(e) { console.log('No default data.json found'); }
+}
+
+function updateCounterUI() {
+  const total = allQuestions.length;
+  document.getElementById('totalCountLabel').textContent = 'Барлығы: ' + total + ' сұрақ';
+  if (questionCount > total) questionCount = total;
+  if (questionCount < 1) questionCount = 1;
+  const countInput = document.getElementById('qCount');
+  countInput.value = questionCount;
+  countInput.max = total;
+  document.getElementById('qMax').textContent = 'макс ' + total;
+  document.getElementById('startBtn').disabled = total === 0;
+}
+
+document.getElementById('qMinus').onclick = () => {
+  if (questionCount > 1) {
+    questionCount--;
+    document.getElementById('qCount').value = questionCount;
+  }
+};
+document.getElementById('qPlus').onclick = () => {
+  if (questionCount < allQuestions.length) {
+    questionCount++;
+    document.getElementById('qCount').value = questionCount;
+  }
+};
+document.getElementById('qCount').addEventListener('input', e => {
+  const total = allQuestions.length;
+  let value = parseInt(e.target.value, 10);
+  if (Number.isNaN(value)) value = 1;
+  if (value < 1) value = 1;
+  if (value > total) value = total;
+  questionCount = value;
+  e.target.value = value;
+});
+
+function setFeedback(mode) {
+  feedbackMode = mode;
+  document.getElementById('toggleInstant').classList.toggle('active', mode === 'instant');
+  document.getElementById('toggleEnd').classList.toggle('active', mode === 'end');
+}
+
+function setShuffle(val) {
+  shuffleEnabled = val;
+  document.getElementById('toggleShuffleOn').classList.toggle('active', val);
+  document.getElementById('toggleShuffleOff').classList.toggle('active', !val);
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startQuiz() {
+  if (allQuestions.length === 0) return;
+  const pool = shuffleEnabled ? shuffle(allQuestions) : [...allQuestions];
+  quizQuestions = pool.slice(0, questionCount);
+  currentIdx = 0; score = 0; answers = []; answersMap.clear();
+  showScreen('quizScreen');
+  renderQuestion();
+}
+
+function saveAnswer(entry) {
+  const existing = answersMap.get(entry.q.id);
+  if (existing) {
+    const idx = answers.findIndex(a => a.q.id === entry.q.id);
+    if (idx !== -1) answers[idx] = entry;
+    else answers.push(entry);
+  } else {
+    answers.push(entry);
+  }
+  answersMap.set(entry.q.id, entry);
+}
+
+function isMultiple(q) {
+  return q.type === 'multiple_choice' || q.type === 'matching' || (q.answer && q.answer.includes(','));
+}
+
+function renderQuestion() {
+  const q = quizQuestions[currentIdx];
+  answered = false;
+  selectedKeys = new Set();
+
+  const total = quizQuestions.length;
+  document.getElementById('quizCounter').textContent = 'Сұрақ ' + (currentIdx + 1) + ' / ' + total;
+  document.getElementById('quizScore').textContent = score + ' дұрыс';
+  document.getElementById('progressFill').style.width = (currentIdx / total * 100) + '%';
+
+  // Определяем, является ли вопрос типом "matching" (сәйкестендіру)
+  const isMatching = q.type === 'matching' || (q.answer && q.answer.includes('-'));
+  const multi = isMultiple(q) || isMatching;
+
+  const badge = document.getElementById('qTypeBadge');
+  if (isMatching) {
+    badge.textContent = 'Сәйкестендіру';
+    badge.className = 'question-type-badge badge-multiple';
+  } else {
+    badge.textContent = multi ? 'Көп жауапты' : 'Бір жауапты';
+    badge.className = 'question-type-badge ' + (multi ? 'badge-multiple' : 'badge-single');
+  }
+
+  document.getElementById('questionText').textContent = q.question;
+  
+  // Очистка и отрисовка подсказок/описаний
+  const hint = document.getElementById('questionHint');
+  hint.innerHTML = '';
+  if (isMatching && q.descriptions) {
+    let descHtml = '<div class="descriptions-list">';
+    q.descriptions.forEach(d => { descHtml += `<div class="description-item">${d}</div>`; });
+    descHtml += '</div>';
+    hint.innerHTML = descHtml;
+  } else {
+    hint.textContent = multi && !isMatching ? '(Бірнеше дұрыс жауап болуы мүмкін)' : '';
+  }
+
+  const answerEntry = answersMap.get(q.id);
+  if (answerEntry && !answerEntry.skipped) {
+    answered = true;
+    selectedKeys = new Set(answerEntry.selected);
+  } else if (answerEntry && answerEntry.skipped) {
+    answered = false;
+    selectedKeys = new Set(answerEntry.selected);
+  } else {
+    answered = false;
+    selectedKeys = new Set();
+  }
+
+  const confirmBtn = document.getElementById('confirmBtn');
+  document.getElementById('feedbackBox').style.display = 'none';
+  confirmBtn.textContent = 'Растау';
+  confirmBtn.onclick = confirmAnswer;
+  confirmBtn.disabled = answered || selectedKeys.size === 0;
+
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML = '';
+
+  // Логика отрисовки кнопок
+  if (isMatching) {
+    const pairs = q.answer.split(',').map(p => p.trim());
+    const leftItems = parseMatchingLeft(q, pairs);
+    const rightItems = parseMatchingRight(q, pairs);
+    matchingState = { selectedSide: null, selectedItem: null, leftItems, rightItems, pairs: new Set() };
+    grid.classList.add('matching-grid');
+    createMatchingGrid(grid, leftItems, rightItems);
+    if (answerEntry && answerEntry.selected.length) {
+      answerEntry.selected.forEach(pair => {
+        const [leftKey, rightKey] = pair.split('-').map(s => s.trim());
+        const leftBtn = document.querySelector(`.match-btn[data-side="left"][data-key="${leftKey}"]`);
+        const rightBtn = document.querySelector(`.match-btn[data-side="right"][data-key="${rightKey}"]`);
+        if (leftBtn && rightBtn) {
+          leftBtn.classList.add('matched');
+          rightBtn.classList.add('matched');
+          leftBtn.disabled = true;
+          rightBtn.disabled = true;
+          matchingState.pairs.add(pair);
+        }
+      });
+      selectedKeys = new Set(answerEntry.selected);
+      if (!answerEntry.skipped) {
+        applyMatchingResult(q, selectedKeys);
+      }
+    }
+  } else if (q.options) {
+    grid.classList.remove('matching-grid');
+    matchingState = null;
+    Object.entries(q.options).forEach(([key, val]) => {
+      createOptionBtn(grid, key, val, multi);
+    });
+    if (answerEntry && !answerEntry.skipped) {
+      const correctArr = q.answer.includes(',') ? q.answer.split(',').map(s => s.trim()) : q.answer.split('');
+      const correctSet = new Set(correctArr);
+      document.querySelectorAll('.option-btn').forEach(btn => {
+        const key = btn.querySelector('.opt-key').textContent;
+        btn.disabled = true;
+        if (correctSet.has(key) && selectedKeys.has(key)) {
+          btn.classList.add('correct');
+        } else if (selectedKeys.has(key) && !correctSet.has(key)) {
+          btn.classList.add('wrong');
+        } else if (correctSet.has(key) && !selectedKeys.has(key)) {
+          btn.classList.add('missed');
+        }
+      });
+    }
+  } else {
+    grid.classList.remove('matching-grid');
+    matchingState = null;
+  }
+  renderSidebar();
+}
+
+function parseMatchingLeft(q, pairs) {
+  if (Array.isArray(q.matches) && Array.isArray(q.descriptions) && q.descriptions.length) {
+    return q.descriptions.map(item => {
+      const match = /([A-Z])\)\s*(.*)/.exec(item);
+      if (match) return { key: match[1].trim(), label: match[2].trim() };
+      const [key, ...rest] = item.split('-').map(s => s.trim());
+      return { key, label: rest.join('-').trim() || item };
+    });
+  }
+
+  const items = [];
+  const regex = /([A-Z])\)\s*([^,]+)/g;
+  let match;
+  while ((match = regex.exec(q.question)) !== null) {
+    items.push({ key: match[1].trim(), label: match[2].trim() });
+  }
+  if (items.length) return items;
+  return pairs.map(pair => {
+    const [leftKey] = pair.split('-').map(s => s.trim());
+    return { key: leftKey, label: leftKey };
+  });
+}
+
+function parseMatchingRight(q, pairs) {
+  if (Array.isArray(q.matches) && q.matches.length) {
+    return q.matches.map(item => {
+      const [key, ...rest] = item.split('-').map(s => s.trim());
+      return { key, label: rest.join('-').trim() || key };
+    });
+  }
+  if (Array.isArray(q.descriptions) && q.descriptions.length) {
+    return q.descriptions.map(item => {
+      const [key, ...rest] = item.split('-').map(s => s.trim());
+      return { key, label: rest.join('-').trim() || item };
+    });
+  }
+  return pairs.map(pair => {
+    const [, rightKey] = pair.split('-').map(s => s.trim());
+    return { key: rightKey, label: rightKey };
+  });
+}
+
+function createMatchingGrid(container, leftItems, rightItems) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'matching-columns';
+
+  const leftCol = document.createElement('div');
+  leftCol.className = 'matching-column';
+  leftCol.innerHTML = '<div class="section-title">Сол жағы</div>';
+  leftItems.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn match-btn';
+    btn.dataset.side = 'left';
+    btn.dataset.key = item.key;
+    const keyEl = document.createElement('div');
+    keyEl.className = 'opt-key';
+    keyEl.textContent = item.key;
+    const textEl = document.createElement('div');
+    textEl.className = 'opt-text';
+    textEl.textContent = item.label;
+    btn.appendChild(keyEl);
+    btn.appendChild(textEl);
+    btn.onclick = () => toggleMatchingItem(item, 'left', btn);
+    leftCol.appendChild(btn);
+  });
+
+  const rightCol = document.createElement('div');
+  rightCol.className = 'matching-column';
+  rightCol.innerHTML = '<div class="section-title">Оң жағы</div>';
+  rightItems.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn match-btn';
+    btn.dataset.side = 'right';
+    btn.dataset.key = item.key;
+    const keyEl = document.createElement('div');
+    keyEl.className = 'opt-key';
+    keyEl.textContent = item.key;
+    const textEl = document.createElement('div');
+    textEl.className = 'opt-text';
+    textEl.textContent = item.label;
+    btn.appendChild(keyEl);
+    btn.appendChild(textEl);
+    btn.onclick = () => toggleMatchingItem(item, 'right', btn);
+    rightCol.appendChild(btn);
+  });
+
+  wrapper.appendChild(leftCol);
+  wrapper.appendChild(rightCol);
+  container.appendChild(wrapper);
+
+  const selected = document.createElement('div');
+  selected.id = 'selectedPairsBox';
+  selected.className = 'selected-pairs';
+  selected.textContent = 'Таңдалған жұптар: —';
+  container.appendChild(selected);
+}
+
+function toggleMatchingItem(item, side, btn) {
+  if (answered) return;
+  if (btn.classList.contains('matched')) return;
+  if (!matchingState) return;
+
+  const otherSide = side === 'left' ? 'right' : 'left';
+  const prevSelected = matchingState.selectedSide === side ? matchingState.selectedItem : null;
+
+  if (matchingState.selectedSide === side) {
+    matchingState.selectedSide = null;
+    matchingState.selectedItem = null;
+    btn.classList.remove('active');
+    updateMatchingPreview();
+    return;
+  }
+
+  document.querySelectorAll(`.match-btn[data-side="${side}"]`).forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  if (matchingState.selectedSide === otherSide && matchingState.selectedItem) {
+    const left = side === 'left' ? item : matchingState.selectedItem;
+    const right = side === 'right' ? item : matchingState.selectedItem;
+    const pairKey = `${left.key}-${right.key}`;
+    matchingState.pairs.add(pairKey);
+    matchingState.selectedSide = null;
+    matchingState.selectedItem = null;
+    document.querySelectorAll('.match-btn.active').forEach(b => b.classList.remove('active'));
+
+    const leftBtn = document.querySelector(`.match-btn[data-side="left"][data-key="${left.key}"]`);
+    const rightBtn = document.querySelector(`.match-btn[data-side="right"][data-key="${right.key}"]`);
+    [leftBtn, rightBtn].forEach(b => {
+      if (b) {
+        b.classList.add('matched');
+        b.disabled = true;
+      }
+    });
+  } else {
+    matchingState.selectedSide = side;
+    matchingState.selectedItem = item;
+  }
+
+  selectedKeys = new Set(matchingState.pairs);
+  document.getElementById('confirmBtn').disabled = selectedKeys.size === 0;
+  updateMatchingPreview();
+}
+
+function updateMatchingPreview() {
+  const box = document.getElementById('selectedPairsBox');
+  if (!box) return;
+  if (!matchingState || matchingState.pairs.size === 0) {
+    box.textContent = 'Таңдалған жұптар: —';
+    return;
+  }
+  box.textContent = 'Таңдалған жұптар: ' + [...matchingState.pairs].join(', ');
+}
+
+function createOptionBtn(container, key, val, multi) {
+  const btn = document.createElement('button');
+  btn.className = 'option-btn';
+  const keyEl = document.createElement('div');
+  keyEl.className = 'opt-key';
+  keyEl.textContent = key;
+  const textEl = document.createElement('div');
+  textEl.className = 'opt-text';
+  textEl.textContent = val;
+  btn.appendChild(keyEl);
+  btn.appendChild(textEl);
+  btn.onclick = () => toggleOption(btn, key, multi);
+  container.appendChild(btn);
+}
+
+function toggleOption(btn, key, multi) {
+  if (answered) return;
+  if (multi) {
+    if (selectedKeys.has(key)) {
+      selectedKeys.delete(key);
+      btn.classList.remove('selected');
+    } else {
+      selectedKeys.add(key);
+      btn.classList.add('selected');
+    }
+  } else {
+    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+    selectedKeys = new Set([key]);
+    btn.classList.add('selected');
+  }
+  document.getElementById('confirmBtn').disabled = selectedKeys.size === 0;
+}
+
+function applyMatchingResult(q, selectedPairs) {
+  const correctArr = q.answer.split(',').map(s => s.trim());
+  const correctSet = new Set(correctArr);
+  document.querySelectorAll('.match-btn').forEach(btn => btn.disabled = true);
+  selectedPairs.forEach(pair => {
+    const [leftKey, rightKey] = pair.split('-').map(s => s.trim());
+    const leftBtn = document.querySelector(`.match-btn[data-side="left"][data-key="${leftKey}"]`);
+    const rightBtn = document.querySelector(`.match-btn[data-side="right"][data-key="${rightKey}"]`);
+    if (!leftBtn || !rightBtn) return;
+    if (correctSet.has(pair)) {
+      leftBtn.classList.add('correct');
+      rightBtn.classList.add('correct');
+    } else {
+      leftBtn.classList.add('wrong');
+      rightBtn.classList.add('wrong');
+    }
+  });
+  correctArr.forEach(pair => {
+    if (!selectedPairs.has(pair)) {
+      const [leftKey, rightKey] = pair.split('-').map(s => s.trim());
+      const leftBtn = document.querySelector(`.match-btn[data-side="left"][data-key="${leftKey}"]`);
+      const rightBtn = document.querySelector(`.match-btn[data-side="right"][data-key="${rightKey}"]`);
+      if (leftBtn && rightBtn) {
+        leftBtn.classList.add('missed');
+        rightBtn.classList.add('missed');
+      }
+    }
+  });
+}
+
+function confirmAnswer() {
+  if (answered || selectedKeys.size === 0) return;
+  answered = true;
+  const q = quizQuestions[currentIdx];
+  const isMatching = q.type === 'matching' || (q.answer && q.answer.includes('-'));
+  let correctArr;
+  if (isMatching) {
+    correctArr = q.answer.split(',').map(s => s.trim());
+  } else if (q.answer.includes(',')) {
+    correctArr = q.answer.split(',').map(s => s.trim());
+  } else {
+    correctArr = q.answer.split('');
+  }
+  const correctSet = new Set(correctArr);
+  const isCorrect = setsEqual(selectedKeys, correctSet);
+
+  if (isMatching) {
+    applyMatchingResult(q, selectedKeys);
+  } else {
+    document.querySelectorAll('.option-btn').forEach(btn => {
+      btn.disabled = true;
+      const key = btn.querySelector('.opt-key').textContent;
+      if (correctSet.has(key) && selectedKeys.has(key)) {
+        btn.classList.add('correct');
+        btn.querySelector('.opt-text').insertAdjacentHTML('afterend', '<span class="opt-icon">✓</span>');
+      } else if (selectedKeys.has(key) && !correctSet.has(key)) {
+        btn.classList.remove('selected');
+        btn.classList.add('wrong');
+        btn.querySelector('.opt-text').insertAdjacentHTML('afterend', '<span class="opt-icon">✗</span>');
+      } else if (correctSet.has(key) && !selectedKeys.has(key)) {
+        if (feedbackMode === 'instant') btn.classList.add('missed');
+      }
+    });
+  }
+
+  if (isCorrect) score++;
+  saveAnswer({ q, selected: [...selectedKeys], correct: isCorrect, skipped: false });
+
+  const confirmBtn = document.getElementById('confirmBtn');
+  confirmBtn.disabled = false;
+  if (currentIdx < quizQuestions.length - 1) {
+    confirmBtn.textContent = 'Келесі →';
+    confirmBtn.onclick = nextQuestion;
+  } else {
+    confirmBtn.textContent = 'Нәтиже →';
+    confirmBtn.onclick = showResults;
+  }
+
+  if (feedbackMode === 'instant') {
+    const fb = document.getElementById('feedbackBox');
+    fb.style.display = 'block';
+    if (isCorrect) {
+      fb.className = 'feedback-box correct';
+      fb.textContent = '✓ Дұрыс жауап!';
+    } else {
+      fb.className = 'feedback-box wrong';
+      fb.textContent = '✗ Қате. Дұрыс жауап: ' + (isMatching ? correctArr.join(', ') : (q.answer.includes(',') ? q.answer : q.answer.split('').join(', ')));
+    }
+  }
+  renderSidebar();
+}
+
+function skipQuestion() {
+  if (answered) return;
+  saveAnswer({ q: quizQuestions[currentIdx], selected: [], correct: false, skipped: true });
+  renderSidebar();
+  nextQuestion();
+}
+
+function renderSidebar() {
+  const sidebar = document.getElementById('quizSidebar');
+  if (!sidebar) return;
+  sidebar.innerHTML = '';
+  const title = document.createElement('div');
+  title.className = 'sidebar-title';
+  title.textContent = 'Сұрақтар';
+  sidebar.appendChild(title);
+
+  quizQuestions.forEach((q, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'sidebar-item';
+    const entry = answersMap.get(q.id);
+    if (idx === currentIdx) btn.classList.add('current');
+    if (entry) {
+      if (entry.skipped) btn.classList.add('skipped');
+      else if (entry.correct) btn.classList.add('correct-status');
+      else btn.classList.add('wrong-status');
+    }
+    btn.textContent = `${idx + 1}`;
+    btn.onclick = () => goToQuestion(idx);
+    sidebar.appendChild(btn);
+  });
+}
+
+function goToQuestion(index) {
+  if (index < 0 || index >= quizQuestions.length) return;
+  currentIdx = index;
+  renderQuestion();
+}
+
+function nextQuestion() {
+  currentIdx++;
+  const confirmBtn = document.getElementById('confirmBtn');
+  confirmBtn.textContent = currentIdx < quizQuestions.length - 1 ? 'Келесі →' : 'Нәтиже →';
+  confirmBtn.onclick = nextQuestion;
+  if (currentIdx >= quizQuestions.length) showResults();
+  else renderQuestion();
+}
+
+function setsEqual(a, b) {
+  if (a.size !== b.size) return false;
+  for (const v of a) if (!b.has(v)) return false;
+  return true;
+}
+
+function showResults() {
+  showScreen('resultsScreen');
+  const total = answers.length;
+  const correct = answers.filter(a => a.correct).length;
+  const skipped = answers.filter(a => a.skipped).length;
+  const pct = Math.round(correct / quizQuestions.length * 100);
+
+  document.getElementById('scorePct').textContent = pct + '%';
+  document.getElementById('statCorrect').textContent = correct;
+  document.getElementById('statWrong').textContent = total - correct - skipped;
+  document.getElementById('statSkipped').textContent = skipped;
+
+  const list = document.getElementById('reviewList');
+  list.innerHTML = '';
+  answers.forEach((ans, i) => {
+    const div = document.createElement('div');
+    div.className = 'review-item ' + (ans.skipped ? 'partial-item' : (ans.correct ? 'correct-item' : 'wrong-item'));
+    const status = ans.skipped ? 'Өткізілді' : (ans.correct ? 'Дұрыс' : 'Қате');
+    div.innerHTML = `
+      <span class="review-status s-${ans.correct?'correct':(ans.skipped?'partial':'wrong')}">${status}</span>
+      <div class="review-q">${i+1}. ${ans.q.question}</div>
+      <div class="review-row">Сіздің жауабыңыз: <span>${ans.selected.join(', ') || '—'}</span></div>
+      ${!ans.correct ? `<div class="review-row review-correct">Дұрыс жауап: <span>${ans.q.answer}</span></div>` : ''}
+    `;
+    list.appendChild(div);
+  });
+}
+
+function restartQuiz() { startQuiz(); }
+function goSetup() { showScreen('setupScreen'); }
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+loadDefaultJSON();</script>
+</body>
+</html>
